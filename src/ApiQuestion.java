@@ -6,7 +6,6 @@ public class ApiQuestion {
     private String correct_answer;
     private String[] incorrect_answers;
 
-    // Getter per accedere ai dati
     public String getCategory() {
         return category;
     }
