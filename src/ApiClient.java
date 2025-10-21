@@ -1,24 +1,28 @@
 import java.io.IOException;
+import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
 public class ApiClient {
-    private final HttpClient client = HttpClient.newHttpClient(); //è statico, non serve il costruttore
-    public String fetchQuestions(int amount, String difficulty, String type){
-        //https://opentdb.com/api.php?amount=5&difficulty=easy&type=multiple
-        String url = "https://opentdb.com/api.php?amount=" + amount + "&difficulty=" + difficulty + "&type=" + type;
-        HttpRequest request = HttpRequest.newBuilder() // sempre statico
-                .header("Content-Type", "applications/json")
-                .uri(java.net.URI.create(url))
+    private final HttpClient client = HttpClient.newHttpClient();
+
+    public String fetchData(int amount, String difficulty, String type) {
+        String url = "https://opentdb.com/api.php?amount=" + amount +
+                "&difficulty=" + difficulty + "&type=" + type;
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Accept", "application/json")
                 .GET()
                 .build();
-        HttpResponse<String> response;
-        try{
-           response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        try {
+            HttpResponse<String> response =
+                    client.send(request, HttpResponse.BodyHandlers.ofString());
+            return response.body();
         } catch (IOException | InterruptedException e) {
-            return "Error: "+e.getMessage();
+            System.out.println("Richiesta fallita: " + e.getMessage());
+            return "";
         }
-        return response.body();
     }
 }
