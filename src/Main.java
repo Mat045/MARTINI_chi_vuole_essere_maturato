@@ -12,13 +12,13 @@ public class Main {
         System.out.print("Inserisci il tuo nome: ");
         String playerName = scanner.nextLine();
 
-        // 🔹 Scarica le domande (5 easy, 3 medium, 2 hard)
         List<ApiQuestion> allQuestions = new ArrayList<>();
         allQuestions.addAll(fetchQuestions(client, gson, 5, "easy"));
         allQuestions.addAll(fetchQuestions(client, gson, 3, "medium"));
         allQuestions.addAll(fetchQuestions(client, gson, 2, "hard"));
 
         System.out.println("\nBenvenuto, " + playerName + "!");
+        System.out.println("Rispondi correttamente a tutte le domande per diventare MATURATO!\n");
 
         int correctAnswers = 0;
         boolean used5050 = false;
@@ -27,12 +27,12 @@ public class Main {
         for (int i = 0; i < allQuestions.size(); i++) {
             ApiQuestion q = allQuestions.get(i);
 
-            System.out.println("Domanda " + (i + 1) + " (" + q.getDifficulty() + ")");
             List<String> answers = new ArrayList<>();
             answers.add(q.getCorrectAnswer());
             answers.addAll(Arrays.asList(q.getIncorrectAnswers()));
             Collections.shuffle(answers);
 
+            System.out.println("Domanda " + (i + 1) + " (" + q.getDifficulty() + ")");
             System.out.println(q.getQuestion());
             char letter = 'A';
             for (String ans : answers) {
@@ -44,11 +44,10 @@ public class Main {
             String input = scanner.nextLine().trim().toUpperCase();
 
             if (input.equals("H")) {
-                System.out.println("Scegli aiuto:");
                 if (!used5050) System.out.println("1) Guarda il bigliettino (50/50)");
                 if (!usedAudience) System.out.println("2) Suggerimento dei compagni");
                 System.out.print("Scelta: ");
-                String choice = scanner.nextLine();
+                String choice = scanner.nextLine().trim();
 
                 if (choice.equals("1") && !used5050) {
                     used5050 = true;
@@ -57,34 +56,33 @@ public class Main {
                     usedAudience = true;
                     useAudience(q);
                 } else
-                    System.out.println("Aiuto non disponibile o già usato!");
+                    System.out.println("Aiuto non disponibile o già usato");
                 i--;
                 continue;
             }
 
             if (input.equals("R")) {
-                System.out.println("Domande risposte correttamente: " + correctAnswers);
+                System.out.println("Ti sei ritirato! Hai risposto correttamente a " + correctAnswers + " domande.");
                 break;
             }
-
             int index = input.charAt(0) - 'A';
             if (index >= 0 && index < answers.size()) {
                 if (answers.get(index).equals(q.getCorrectAnswer())) {
-                    System.out.println("GIUSTO");
+                    System.out.println("GIUSTO\n");
                     correctAnswers++;
                 } else {
                     System.out.println("SBAGLIATO");
-                    System.out.println("Vera risposta: " + q.getCorrectAnswer());
-                    break;
+                    System.out.println("La risposta giusta era: " + q.getCorrectAnswer() + "\n");
                 }
             } else {
-                System.out.println("Input non valido");
+                System.out.println("Input non valido! Riprova.");
                 i--;
             }
         }
 
         PlayerStatistics stats = new PlayerStatistics(playerName, correctAnswers, used5050, usedAudience);
         saveStats(stats, gson);
+
         System.out.println("\nHai risposto correttamente a " + correctAnswers + " domande");
     }
 
@@ -92,28 +90,27 @@ public class Main {
         String json = client.fetchData(amount, difficulty, "multiple");
         ApiResponse response = gson.fromJson(json, ApiResponse.class);
         if (response == null || response.getResults() == null) {
-            System.out.println("Nessuna domanda trovata per " + difficulty);
+            System.out.println("Nessuna domanda trovata per difficoltà: " + difficulty);
             return new ArrayList<>();
         }
         return response.getResults();
     }
-
 
     private static void use5050(ApiQuestion q) {
         List<String> wrongs = new ArrayList<>(Arrays.asList(q.getIncorrectAnswers()));
         Collections.shuffle(wrongs);
         System.out.println("\n💡 50/50 attivo! Eliminate due risposte sbagliate:");
         System.out.println("- " + wrongs.get(0));
-        System.out.println("- " + wrongs.get(1));
+        System.out.println("- " + wrongs.get(1) + "\n");
     }
 
     private static void useAudience(ApiQuestion q) {
         Random r = new Random();
-        int correctPerc = 40 + r.nextInt(30); // tra 40% e 70%
+        int correctPerc = 40 + r.nextInt(31);
         int remaining = 100 - correctPerc;
         System.out.println("\nSuggerimento dei compagni:");
         System.out.println(q.getCorrectAnswer() + ": " + correctPerc + "%");
-        System.out.println("Altre risposte: " + remaining + "% totali divise tra le altre.");
+        System.out.println("Altre risposte: " + remaining + "% divise tra le altre.\n");
     }
 
     private static void saveStats(PlayerStatistics stats, Gson gson) {
