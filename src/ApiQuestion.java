@@ -9,23 +9,18 @@ public class ApiQuestion {
     public String getCategory() {
         return category;
     }
-
     public String getType() {
         return type;
     }
-
     public String getDifficulty() {
         return difficulty;
     }
-
     public String getQuestion() {
         return question;
     }
-
     public String getCorrectAnswer() {
         return correct_answer;
     }
-
     public String[] getIncorrectAnswers() {
         return incorrect_answers;
     }

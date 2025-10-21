@@ -85,16 +85,19 @@ public class Main {
 
         PlayerStatistics stats = new PlayerStatistics(playerName, correctAnswers, used5050, usedAudience);
         saveStats(stats, gson);
-
-        System.out.println("\nHai risposto correttamente a " + correctAnswers + " domande!");
-        System.out.println("Statistiche salvate in player_stats.json");
+        System.out.println("\nHai risposto correttamente a " + correctAnswers + " domande");
     }
 
     private static List<ApiQuestion> fetchQuestions(ApiClient client, Gson gson, int amount, String difficulty) {
         String json = client.fetchData(amount, difficulty, "multiple");
         ApiResponse response = gson.fromJson(json, ApiResponse.class);
+        if (response == null || response.getResults() == null) {
+            System.out.println("Nessuna domanda trovata per " + difficulty);
+            return new ArrayList<>();
+        }
         return response.getResults();
     }
+
 
     private static void use5050(ApiQuestion q) {
         List<String> wrongs = new ArrayList<>(Arrays.asList(q.getIncorrectAnswers()));
@@ -108,7 +111,7 @@ public class Main {
         Random r = new Random();
         int correctPerc = 40 + r.nextInt(30); // tra 40% e 70%
         int remaining = 100 - correctPerc;
-        System.out.println("\n📊 Suggerimento dei compagni:");
+        System.out.println("\nSuggerimento dei compagni:");
         System.out.println(q.getCorrectAnswer() + ": " + correctPerc + "%");
         System.out.println("Altre risposte: " + remaining + "% totali divise tra le altre.");
     }
